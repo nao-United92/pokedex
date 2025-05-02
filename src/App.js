@@ -8,6 +8,7 @@ function App() {
   const initialURL = 'https://pokeapi.co/api/v2/pokemon';
   const [loading, setLoading] = useState(true);
   const [pokemonData, setPokemonData] = useState([]);
+  const [nextURL, setNextURL] = useState();
 
   useEffect(() => {
     const fetchPokemonData = async () => {
@@ -15,6 +16,7 @@ function App() {
       let res = await getAllPokemon(initialURL);
       // 各ポケモンの詳細なデータを取得
       loadPokemon(res.results);
+      setNextURL(res.next);
       setLoading(false);
     };
     fetchPokemonData();
@@ -27,9 +29,18 @@ function App() {
         return pokemonRecord;
       })
     );
-    setLoading(_pokemonData);
+    setPokemonData(_pokemonData);
   };
 
+  const handleNextPage = async () => {
+    setLoading(true);
+    let data = await getAllPokemon(nextURL);
+    await loadPokemon(data.results);
+    setNextURL(data.next);
+    setLoading(false);
+  };
+
+  const handlePrevPage = () => {};
   return (
     <>
       <Navbar />
@@ -42,6 +53,10 @@ function App() {
               {pokemonData.map((pokemon, i) => {
                 return <Card key={i} pokemon={pokemon} />;
               })}
+            </div>
+            <div className="btn">
+              <button onClick={handlePrevPage}>前へ</button>
+              <button onClick={handleNextPage}>次へ</button>
             </div>
           </>
         )}
